@@ -218,6 +218,8 @@ endif
 dir_y						+= mtd-utils
 endif
 
+dir_$(CONFIG_FIRMWARE_INCLUDE_FPING)		+= fping
+
 all:
 	for i in $(dir_y) ; do \
 		[ ! -d $$i ] || \
