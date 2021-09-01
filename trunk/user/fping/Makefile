@@ -3,7 +3,7 @@ SRC_NAME = fping-5.0
 SRC_URL = https://github.com/schweikert/fping/releases/download/v5.0/fping-5.0.tar.gz
 
 all: download_test extract_test
-	$(MAKE) -C $(SRC_NAME) fping SAFE_MODE=1 CC=$(CONFIG_CROSS_COMPILER_ROOT)/bin/mipsel-linux-uclibc-gcc
+	$(MAKE) -C $(SRC_NAME)/src fping SAFE_MODE=1 CC=$(CONFIG_CROSS_COMPILER_ROOT)/bin/mipsel-linux-uclibc-gcc
 	
 download_test: 
 	( if [ ! -f $(THISDIR)/$(SRC_NAME).tar.gz ]; then \
