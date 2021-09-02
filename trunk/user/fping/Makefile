@@ -1,24 +1,42 @@
-THISDIR = $(shell pwd)
 SRC_NAME = fping-5.0
 SRC_URL = https://github.com/schweikert/fping/releases/download/v5.0/fping-5.0.tar.gz
+THISDIR = $(shell pwd)
 
-all: download_test extract_test
-	$(MAKE) -C $(SRC_NAME)/src fping SAFE_MODE=1 CC=$(CONFIG_CROSS_COMPILER_ROOT)/bin/mipsel-linux-uclibc-gcc
-	
-download_test: 
+all: download_test extract_test config_test
+	$(MAKE) -j$(HOST_NCPU) -C $(SRC_NAME)
+
+download_test:
 	( if [ ! -f $(THISDIR)/$(SRC_NAME).tar.gz ]; then \
 		wget -t5 --timeout=20 --no-check-certificate -O $(SRC_NAME).tar.gz $(SRC_URL); \
 	fi )
 
 extract_test:
 	( if [ ! -d $(THISDIR)/$(SRC_NAME) ]; then \
-		tar -xf $(SRC_NAME).tar.gz; \
+		tar zxf $(SRC_NAME).tar.gz; \
 	fi )
 
-romfs:
-	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_NAME)/bin/fping /usr/bin/fping
+config_test:
+	( if [ -f ./config_done ]; then \
+		echo "the same configuration"; \
+	else \
+		make configure && touch config_done; \
+	fi )
+
+configure:
+	( cd $(SRC_NAME) ; \
+	./configure \
+		--prefix=/usr \
+		--disable-nls \
+		--host=$(HOST_TARGET) \
+		--build=$(HOST_BUILD) ; \
+	)
 
 clean:
 	if [ -f $(SRC_NAME)/Makefile ] ; then \
-		$(MAKE) -C $(SRC_NAME) clean ; \
+		$(MAKE) -C $(SRC_NAME) distclean ; \
 	fi ; \
+	rm -f config_done
+
+romfs:
+	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_NAME)/src/fping /usr/bin/fping
+	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_NAME)/src/fping /usr/bin/fping
